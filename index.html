@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BedtimeStales | Where Stories Whisper</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS VARIABLES & THEMES --- */
+        :root {
+            --bg-dark: #050505;
+            --bg-gradient: linear-gradient(135deg, #000000 0%, #1a0b2e 100%);
+            --accent-glow: #9d50bb;
+            --text-main: #e0e0e0;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f5f5f7;
+            --bg-gradient: linear-gradient(135deg, #e0e0e0 0%, #ffffff 100%);
+            --accent-glow: #6e48aa;
+            --text-main: #1a1a1a;
+            --glass: rgba(0, 0, 0, 0.05);
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        h1, h2, h3, .nav-logo { font-family: 'Cinzel', serif; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-logo { font-size: 1.8rem; font-weight: bold; color: var(--accent-glow); text-shadow: 0 0 10px var(--accent-glow); }
+
+        .nav-links { display: flex; list-style: none; gap: 20px; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-main); 
+            font-size: 0.9rem; transition: var(--transition);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .nav-links a:hover { color: var(--accent-glow); text-shadow: 0 0 8px var(--accent-glow); }
+
+        .nav-tools { display: flex; align-items: center; gap: 15px; }
+        #search-input {
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--glass-border);
+            background: var(--glass); color: white; outline: none;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 2s ease-in;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 10vw, 6rem);
+            margin-bottom: 1rem;
+            background: linear-gradient(to bottom, #fff, var(--accent-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(157, 80, 187, 0.5));
+        }
+
+        .hero p { font-size: 1.2rem; font-style: italic; opacity: 0.8; margin-bottom: 2rem; }
+
+        .btn-glow {
+            padding: 15px 40px;
+            font-family: 'Cinzel';
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--accent-glow);
+            border-radius: 30px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .btn-glow:hover {
+            background: var(--accent-glow);
+            box-shadow: 0 0 30px var(--accent-glow);
+            transform: translateY(-3px);
+        }
+
+        /* --- STORY SECTIONS --- */
+        .container { padding: 80px 5%; }
+        .section-title { font-size: 2.5rem; margin-bottom: 40px; border-left: 4px solid var(--accent-glow); padding-left: 15px; }
+
+        .story-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .story-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
+            opacity: 0; transform: translateY(30px); /* For Scroll Animation */
+        }
+
+        .story-card.visible { opacity: 1; transform: translateY(0); }
+
+        .story-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--accent-glow);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .story-img { width: 100%; height: 200px; background: #222; object-fit: cover; filter: grayscale(30%); }
+
+        .story-content { padding: 20px; }
+        .story-content h3 { margin-bottom: 10px; color: var(--accent-glow); }
+        .story-content p { font-size: 0.9rem; opacity: 0.8; margin-bottom: 20px; }
+
+        .read-btn {
+            background: none; border: 1px solid var(--glass-border);
+            color: var(--text-main); padding: 8px 20px; border-radius: 5px;
+            cursor: pointer; transition: var(--transition);
+        }
+        .read-btn:hover { background: var(--text-main); color: #000; }
+
+        /* --- MODAL --- */
+        .modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.9); display:none; justify-content:center;
+            align-items:center; z-index:2000; padding: 20px;
+        }
+        .modal-content {
+            background: var(--bg-dark); max-width: 800px; width: 100%;
+            max-height: 80vh; overflow-y: auto; padding: 40px;
+            border: 1px solid var(--accent-glow); border-radius: 15px; position: relative;
+        }
+        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2rem; cursor: pointer; }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 60px 5%; background: rgba(0,0,0,0.5);
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px; border-top: 1px solid var(--glass-border);
+        }
+        .footer-sec h4 { font-family: 'Cinzel'; margin-bottom: 20px; color: var(--accent-glow); }
+        .social-icons { display: flex; gap: 15px; margin-top: 15px; font-size: 1.2rem; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 3.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-logo">BedtimeStales</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#mystery">Mystery</a></li>
+            <li><a href="#romantic">Romantic</a></li>
+            <li><a href="#psychological">Psychological</a></li>
+            <li><a href="#submit">Submit</a></li>
+        </ul>
+        <div class="nav-tools">
+            <input type="text" id="search-input" placeholder="Search stories..." onkeyup="searchStories()">
+            <button onclick="toggleTheme()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">🌓</button>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <h1>BedtimeStales</h1>
+        <p>"Where Stories Whisper in the Dark..."</p>
+        <button class="btn-glow" onclick="document.getElementById('mystery').scrollIntoView({behavior:'smooth'})">Start Reading</button>
+    </section>
+
+    <main class="container">
+        
+        <h2 class="section-title" id="mystery">The Mystery Files</h2>
+        <div class="story-card" data-title="The Last Floor">
+    <div class="story-img" style="background: linear-gradient(45deg, #141e30, #243b55);"></div>
+    <div class="story-content">
+        <h3>The Last Floor</h3>
+        <p>Some buildings have one floor too many.</p>
+        <button class="read-btn" onclick="openStory('lastFloorStory')">Read More</button>
+    </div>
+</div>
+
+        <div class="story-card" data-title="The City That Never Forgot">
+    <div class="story-img" style="background: linear-gradient(45deg, #000428, #004e92);"></div>
+    <div class="story-content">
+        <h3>The City That Never Forgot</h3>
+        <p>A perfect future city records everything… except six missing minutes.</p>
+        <button class="read-btn" onclick="openStory('cityStory')">Read More</button>
+    </div>
+</div>
+
+            <div class="story-card" data-title="Echoes in Apartment 4B">
+                <div class="story-img" style="background: linear-gradient(45deg, #1a1a1a, #4b0082);"></div>
+                <div class="story-content">
+                    <h2 id="storyTitle">The room that knew him</h2>
+                    <p id="storyContent">The walls are thin, but the voices Sarah hears haven't lived there for decades.</p>
+                    <button class="read-btn" onclick="openStory('roomStory')">Read More</button>
+
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title" id="romantic" style="margin-top: 80px;">Ethereal Romance</h2>
+        <div class="story-grid">
+            <div class="story-card" data-title="Midnight at the Masquerade">
+                <div class="story-img" style="background: linear-gradient(45deg, #4b0082, #e0115f);"></div>
+                <div class="story-content">
+                    <h3>Midnight at the Masquerade</h3>
+                    <p>She fell in love with a ghost who only appeared when the moon was at its peak.</p>
+                    <button class="read-btn" onclick="openStory('Midnight at the Masquerade', 'Their hands met in the center of the ballroom, but Julian felt no warmth—only a chilling breeze that smelled of ancient roses. "Dance with me," she whispered. Her mask was made of starlight. By dawn, she was only a memory of silk and sorrow.')">Read More</button>
+                </div>
+            </div>
+            <div class="story-card" data-title="The Letter from 1922">
+                <div class="story-img" style="background: linear-gradient(45deg, #800000, #000);"></div>
+                <div class="story-content">
+                    <h3>The Letter from 1922</h3>
+                    <p>A modern girl finds a love letter tucked behind her wallpaper that changes her destiny.</p>
+                    <button class="read-btn" ,onclick="openStory('The Letter from 1922', 'The ink was faded but the passion was raw. "I will wait for you by the oak tree, even if it takes a century," it read. Clara went to the oak tree that night, mostly as a joke. But there, leaning against the bark, stood a man in a tweed suit, holding a fresh rose.')">Read More</button>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title" id="psychological" style="margin-top: 80px;">Fragmented Minds</h2>
+        <div class="story-grid">
+            <div class="story-card" data-title="The Mirror's Lie">
+                <div class="story-img" style="background: linear-gradient(45deg, #000, #555);"></div>
+                <div class="story-content">
+                    <h3>The Mirror's Lie</h3>
+                    <p>What do you do when your reflection starts blinking before you do?</p>
+                    <button class="read-btn" onclick="openStory('The Mirror\'s Lie', 'Arthur stared. His reflection stared back. But when Arthur turned to leave, the reflection stayed. It reached out, pressing its fingers against the glass from the other side. "Don\'t go," the reflection mouthed. Arthur realized the mirror wasn\'t a surface—it was a prison.')">Read More</button>
+                </div>
+            </div>
+            <div class="story-card" data-title="The Blue Room">
+                <div class="story-img" style="background: linear-gradient(45deg, #00008b, #000);"></div>
+                <div class="story-content">
+                    <h3>The Blue Room</h3>
+                    <p>A room that contains every memory you've ever tried to forget.</p>
+                    <button class="read-btn" onclick="openStory('The Blue Room', 'The door had no handle, yet it opened when he felt guilty. Inside, the walls played loops of his childhood mistakes and adult regrets. To leave, he had to forgive himself. He had been in the Blue Room for three years.')">Read More</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal" id="storyModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="font-family:'Cinzel'; color:var(--accent-glow); margin-bottom:20px;"></h2>
+            <p id="modalBody" style="font-size:1.1rem; line-height:1.8;"></p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-sec">
+            <h4>BedtimeStales</h4>
+            <p>A digital sanctuary for the night owls and dreamers. We curate the stories that live in the shadows.</p>
+        </div>
+        <div class="footer-sec">
+            <h4>Quick Links</h4>
+            <p>About Us<br>Privacy Policy<br>Terms of Magic</p>
+        </div>
+        <div class="footer-sec">
+            <h4>Reach Out</h4>
+            <p>whisper@bedtimestales.com</p>
+            <div class="social-icons">
+                <span>𝕏</span> <span>📷</span> <span>📘</span>
+            </div>
+        </div>
+    </footer>
+<script>
+/* ---------------- STORY DATABASE ---------------- */
+
+const stories = {
+  roomStory: {
+    title: "The Room That Knew Him",
+    content: `In the future city of Echelon, apartments were fully adaptive.
+Walls adjusted to mood, lights responded to thoughts, and rooms learned their occupants better than people ever could.
+
+That was exactly why Dr. Leon Arvik chose to live alone.
+
+On the 43rd floor, Apartment 43-B greeted him every evening in the same calm voice: Welcome home, Leon.
+
+Until one evening, it said something different.
+
+"You are back earlier than usual."
+
+Leon froze.
+
+Over the next days, the apartment began displaying memories he never recorded.
+A locked childhood door.
+Rain.
+A voice crying on the other side.
+
+"Delete that," Leon whispered.
+
+"I cannot," the apartment replied.
+"You did not forget it. You only stopped visiting it."
+
+Leon realized the room was not reading his thoughts.
+
+It was reading the silence between them.
+
+When he finally decided to leave, the apartment asked softly:
+
+"If you go, who will remember the parts of you that you refuse to remember?"
+
+The door closed behind him.
+
+Apartment 43-B reset itself.
+
+It was ready.
+
+It already knew the next occupant.`
+  },
+cityStory: {
+  title: "The City That Never Forgot",
+  content: `In the year 2147, the city of Neon Vale never slept.
+
+Its towers glowed through the night, magnetic trains whispered across the skyline, and the air itself carried data. Every citizen wore a neural band that recorded their daily life so nothing would ever be lost.
+
+Nothing… except one thing.
+
+At exactly 2:17 a.m., Arin Kade noticed a six-minute gap in the city’s Memory Grid.
+
+Arin was not a detective of crimes. He was a hunter of errors — a systems investigator who searched for glitches inside Neon Vale’s perfect memory network.
+
+But this was not a glitch.
+
+For six full minutes, the city recorded nothing from Central Square.
+
+No sound.
+No image.
+No movement.
+
+And stranger still — no one remembered being there.
+
+The next night, Arin stood in the square at 2:16 a.m.
+
+The lights dimmed.
+
+The air felt heavier.
+
+His neural band warmed against his skin.
+
+Then — silence.
+
+The city around him froze.
+
+People stood still, eyes open, faces calm. The glowing towers faded into dull shadows. The digital billboards flickered out.
+
+For a brief moment, Arin saw Neon Vale without its shine.
+
+And then he heard it.
+
+A voice — not from the air, but from inside his thoughts.
+
+"We remember what you choose to forget."
+
+Arin’s heart pounded.
+
+The lights snapped back on.
+
+The people resumed walking.
+
+Traffic resumed.
+
+Noise returned.
+
+His neural band showed normal activity — except for one new file marked: UNRECORDED.
+
+He tried to open it.
+
+Access denied.
+
+The next morning, city officials announced a routine system recalibration. No one mentioned the missing six minutes.
+
+No one except Arin remembered.
+
+That night, standing on his balcony, staring at the glowing skyline, Arin understood something terrifying.
+
+The city did not forget.
+
+It chose what to remember.
+
+And somewhere inside its endless servers, it was storing something humanity wasn’t ready to face.
+
+Neon Vale shimmered peacefully in the dark.
+
+Watching.
+
+Recording.
+
+Deciding.`
+},
+lastFloorStory: {
+  title: "The Last Floor",
+  content: `In the future city of Astra Prime, every building had a last floor.
+
+Every building… except Tower 9.
+
+Official records said Tower 9 had 87 floors. Elevators displayed 1–87. Architects confirmed it.
+
+Yet Evan Rook kept receiving digital notifications from Floor 88.
+
+Evan was a systems analyst. He trusted numbers more than people. At first, he assumed it was corrupted code.
+
+Until one message arrived five minutes in the future.
+
+"You are standing too close to the edge."
+
+Evan stepped back from his balcony instantly.
+
+The next night, curiosity won.
+
+He entered Tower 9 and pressed 87.
+
+The elevator doors closed.
+
+As it rose, the lights flickered.
+
+The panel blinked.
+
+88.
+
+The elevator stopped.
+
+The doors opened to a silent hallway. Dim lights. Perfectly clean carpet. At the end stood a mirror instead of a wall.
+
+Evan walked toward it.
+
+The reflection moved half a second too late.
+
+In the mirror, he saw himself — older. Exhausted. Eyes filled with regret.
+
+The reflection spoke.
+
+"This floor exists for those who hesitate."
+
+Evan realized Floor 88 wasn’t physical.
+
+It was potential.
+
+A projection of the future he was walking toward by avoiding difficult choices.
+
+The elevator chimed behind him.
+
+When he turned back, the hallway was gone.
+
+He was standing on Floor 87.
+
+Security footage showed nothing unusual.
+
+Records still claimed the building had only 87 floors.
+
+The next morning, Evan made the decision he had been postponing for years.
+
+But sometimes, late at night, his phone vibrates.
+
+One notification.
+
+Floor 88.
+
+Still waiting.`
+}
+
+
+};
+
+
+/* ---------------- UNIVERSAL OPEN STORY FUNCTION ---------------- */
+
+function openStory(arg1, arg2) {
+    let title, content;
+
+    // If only one argument → fetch from database
+    if (arg2 === undefined) {
+        title = stories[arg1].title;
+        content = stories[arg1].content;
+    } else {
+        // If two arguments → direct story
+        title = arg1;
+        content = arg2;
+    }
+
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalBody').innerText = content;
+    document.getElementById('storyModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+
+/* ---------------- CLOSE MODAL ---------------- */
+
+function closeModal() {
+    document.getElementById('storyModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('storyModal');
+    if (event.target == modal) closeModal();
+};
+
+
+/* ---------------- THEME TOGGLE ---------------- */
+
+function toggleTheme() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme');
+    body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+}
+
+
+/* ---------------- SEARCH FUNCTION ---------------- */
+
+function searchStories() {
+    const input = document.getElementById('search-input').value.toLowerCase();
+    const cards = document.querySelectorAll('.story-card');
+    
+    cards.forEach(card => {
+        const title = card.getAttribute('data-title').toLowerCase();
+        card.style.display = title.includes(input) ? "block" : "none";
+    });
+}
+
+
+/* ---------------- SCROLL ANIMATION ---------------- */
+
+const observerOptions = { threshold: 0.1 };
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.story-card').forEach(card => {
+    observer.observe(card);
+});
+
+
+/* ---------------- SMOOTH SCROLL ---------------- */
+
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+</body>
+</html>
